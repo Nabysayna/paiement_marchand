@@ -14,25 +14,23 @@ class paiement_marchandController extends Controller {
     $this->bdd=new \pdo("mysql:host=localhost;dbname=mbirmiprod","root","");
   }
   public function closeConnection(){
-    $this->bdd=null;
+    
   }
 
   public function initier(Request $request, Response $response, $args){
     header("Access-Control-Allow-Origin: *");
     $param = $request->getParsedBody();
-    if(isset($param["service"]) && isset($param["montant"])){
+    if($request->isPost() && isset($param["service"]) && isset($param["montant"])){
       try{
-       // $bdd=new \pdo("mysql:host=localhost;dbname=mbirmiprod","root","");
         $req=$this->bdd->prepare("INSERT INTO transaction(montant,services,etat) VALUES(:montant,:services,:etat)");
         $status=$req->execute(array(":montant"=>$param["montant"],":services"=>$param["service"],":etat"=>1));
-       // closeConnection();
-        return $response->withJson(array("idDem"=> 1, "codeMessage" =>"#123#","status"=>$status),200); 
+        $lastId=$this->bdd->lastInsertId();
+        $req->closeCursor();
+        return $response->withJson(array("idDem"=> $lastId, "codeMessage" =>"#123#","status"=>$status),200); 
       }catch(Exception $e){
-       // closeConnection();
         return $response->withJson(array("status"=>false,"message"=>"problem de connection a la base de donnee"));
       }
     }else{
-     // closeConnection();
       return $response->withJson(array("status"=>false,"message"=>"parametres incorrectes"));
     }
      
@@ -40,12 +38,34 @@ class paiement_marchandController extends Controller {
 
   	
   public function confirmer(Request $request, Response $response, $args){
-      $codeSMS = $request->getParsedBody()["codeSMS"];
-      if($codeSMS == 1234)
+      $param = $request->getParsedBody();
+      if($request->isPost() && isset($param["code"]) && isset($param["id"])){
+        $req=$this->bdd->prepare("SELECT * FROM transaction WHERE id=:id");
+        $req->execute(array(":id"=>intval($param["id"])));
+        $data=$req->fetch();
+        if($data){
+          \date_default_timezone_set('UTC');
+          $date=new \DateTime();
+          $date=$date->format('Y-m-d H:i');
+          $req2=$this->bdd->prepare("UPDATE transaction SET etat=3,codeConfirm=:code,dateValide=:datev WHERE id=:id");
+          $rep1=$req2->execute(array(":code"=>$param["code"],":id"=>intval($param["id"]),":datev"=>$date));
+          $req2->closeCursor();
+          if($rep1==1){
+            return $response->withJson(array("code"=>1,"message"=>"transaction confirme"),200);
+          }else{
+            return $response->withJson(array("code"=>-1,"message"=>"erreur au niveau du serveur"),500);
+          }
+
+        }else{
+          return $response->withJson(array("code"=>0,"message"=>"transaction non initier"),400);
+        }
+
+      }
+     /* if($codeSMS == 1234)
         return $response->withJson(array("errorCode"=> 1,"data" => '1234')); 
       else
          return $response->withJson(array("errorCode"=> 0,"data" => '')); 
-     
+     */
   } 
     
     
