@@ -10,9 +10,11 @@
 
 $app->group('/paiement_marchand', function () {
 
-	$this->get('/initierPaie', App\Controllers\paiement_marchandController::class .':initier');
+	$this->post('/initierPaie', App\Controllers\paiement_marchandController::class .':initier');
 
 	$this->post('/confirmerPaie', App\Controllers\paiement_marchandController::class .':confirmer');
+	
+	$this->post('/ReceptPaiement', App\Controllers\paiement_marchandController::class .':ReceptPaiement');
 
 	
 

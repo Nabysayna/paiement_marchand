@@ -11,7 +11,7 @@ use \App\Controller;
 class paiement_marchandController extends Controller {
   private $bdd;
   public function __construct(){
-    $this->bdd=new \pdo("mysql:host=localhost;dbname=mbirmiprod","root","");
+    $this->bdd=new \pdo("mysql:host=localhost;dbname=paiement_marchand","root","");
   }
   public function closeConnection(){
     
@@ -27,7 +27,7 @@ class paiement_marchandController extends Controller {
         $lastId=$this->bdd->lastInsertId();
         $req->closeCursor();
         return $response->withJson(array("idDem"=> $lastId, "codeMessage" =>"#123#","status"=>$status),200); 
-      }catch(Exception $e){
+       }catch(Exception $e){
         return $response->withJson(array("status"=>false,"message"=>"problem de connection a la base de donnee"));
       }
     }else{
@@ -67,6 +67,42 @@ class paiement_marchandController extends Controller {
          return $response->withJson(array("errorCode"=> 0,"data" => '')); 
      */
   } 
-    
+    public function ReceptPaiement(Request $request, Response $response, $args){
+      $param = $request->getParsedBody();
+      if($request->isPost() && isset($param["message"]) && isset($param["service"])){
+        ///if($param["service"] == "OrangeMoney"){
+          $num = explode(" ", $param["message"]);
+          $montant = explode(".", $num[8])[0];
+          $numero = $num[10];
+        //}
+        
+        $randomDigit = mt_rand(0, 9);
+        $tokenTemp = strval($randomDigit);
+        for ($i=1; $i <6 ; $i++) {
+            $randomDigit = mt_rand(0,9);
+           $tokenTemp =$tokenTemp.strval($randomDigit) ;
+        }
+         //$data=$req->fetch();
+
+          $date=new \DateTime();
+          $date=$date->format('Y-m-d H:i');
+          $req=$this->bdd->prepare("INSERT INTO codeconfirmtab(nomservice,codemessage,datecode,etat) VALUES(:nomservice,:codemessage,:datecode,:etat)");
+          $status=$req->execute(array(":nomservice"=>$param["service"],":codemessage"=>$tokenTemp,"datecode"=>$date,":etat"=>1));
+         
+         if($status==1){
+            return $response->withJson(array("message"=>"transaction confirme","numero"=>trim($numero,'.'),"montant"=>$montant,"code"=>$tokenTemp),200);
+          }else{
+            return $response->withJson(array("code"=>-1,"message"=>"erreur au niveau du serveur"),500);
+            
+          }
+
+
+      }
+     /* if($codeSMS == 1234)
+        return $response->withJson(array("errorCode"=> 1,"data" => '1234')); 
+      else
+         return $response->withJson(array("errorCode"=> 0,"data" => '')); 
+     */
+  } 
     
 }
