@@ -15,7 +15,6 @@ $app->group('/paiement_marchand', function () {
 	$this->post('/confirmerPaie', App\Controllers\paiement_marchandController::class .':confirmer');
 	
 	$this->post('/ReceptPaiement', App\Controllers\paiement_marchandController::class .':ReceptPaiement');
-
 	
 
 });

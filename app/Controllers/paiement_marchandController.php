@@ -78,7 +78,7 @@ class paiement_marchandController extends Controller {
         
         $randomDigit = mt_rand(0, 9);
         $tokenTemp = strval($randomDigit);
-        for ($i=1; $i <6 ; $i++) {
+        for ($i=1; $i <6 ; $i++) { 
             $randomDigit = mt_rand(0,9);
            $tokenTemp =$tokenTemp.strval($randomDigit) ;
         }
