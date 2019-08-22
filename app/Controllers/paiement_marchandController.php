@@ -26,7 +26,15 @@ class paiement_marchandController extends Controller {
         $status=$req->execute(array(":montant"=>$param["montant"],":services"=>$param["service"],":etat"=>1));
         $lastId=$this->bdd->lastInsertId();
         $req->closeCursor();
-        return $response->withJson(array("idDem"=> $lastId, "codeMessage" =>"#123#","status"=>$status),200); 
+        $req1=$this->bdd->prepare("SELECT * FROM loumanekh WHERE nomService=:nomService AND etat=1 limit 1");
+        $req1->execute(array(":nomService"=>$param["service"]));
+        $data=$req1->fetch();
+        if($data){
+          return $response->withJson(array("idDem"=> $lastId, "codeMessage" =>"#144*211*".$data['codeMessage']."*".$param["montant"]."*2*code#","status"=>$status),200); 
+        }else{
+           return $response->withJson(array("status"=>false,"message"=>"Pas de numero disponible"));
+        }
+        
        }catch(Exception $e){
         return $response->withJson(array("status"=>false,"message"=>"problem de connection a la base de donnee"));
       }
