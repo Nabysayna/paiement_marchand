@@ -8,7 +8,7 @@
 
 });*/
 
-$app->group('/paiement_marchand', function () {
+$app->group('/paygal', function () {
 
 	$this->post('/initierPaie', App\Controllers\paiement_marchandController::class .':initier');
 
@@ -16,7 +16,6 @@ $app->group('/paiement_marchand', function () {
 	
 	$this->post('/ReceptPaiement', App\Controllers\paiement_marchandController::class .':ReceptPaiement');
 	
-
 });
 
 

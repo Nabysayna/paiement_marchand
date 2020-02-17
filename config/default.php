@@ -11,7 +11,7 @@ $config = [
 	    	'host' => "localhost",
 	    	'user' => "root",
 	    	'pass' => "",
-	    	'dbname' => "db_der",
+	    	'dbname' => "paiement_marchand",
 	    ],
 
 	]
